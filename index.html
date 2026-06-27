@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2e2e30">
+<title>Zea · postavljanje šatora — Thalatta</title>
+<style>
+  :root{
+    --ink:#2e2e30; --ink2:#3a3a3c; --panel:#47474b; --sand:#eee9e2; --sandDark:#d6cfc1;
+    --pine:#00a341; --pineDeep:#00702c; --amber:#d19c6a; --hot:#a8612b; --cool:#5cb98a;
+    --line:#63636a; --text:#efece4; --dim:#a5a9ac; --you:#00a341;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--ink);color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    padding:16px;-webkit-text-size-adjust:100%}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+  .eyebrow{font-size:11px;letter-spacing:.26em;color:var(--amber);text-transform:uppercase;margin-bottom:6px}
+  .sub{color:var(--dim);font-size:13px;margin-top:7px}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+  .clock{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+  .clock .t{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+  .clock .s{font-size:11px;color:var(--dim)}
+  .grid{display:grid;grid-template-columns:1.45fr 1fr;gap:18px}
+  @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  .mapbox{background:var(--ink2);border:1px solid var(--line);border-radius:14px;padding:12px;position:relative}
+  .mapbox.field{border-color:var(--you)}
+  svg.map{width:100%;height:auto;display:block;border-radius:10px}
+  .banner{position:absolute;top:18px;left:18px;right:18px;z-index:2;background:rgba(6,38,51,.93);
+    border:1px solid var(--you);border-radius:10px;padding:8px 12px;font-size:12.5px;display:flex;gap:8px;align-items:center}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:11px;color:var(--dim);align-items:center}
+  .legend i{width:12px;height:12px;border-radius:3px;display:inline-block;vertical-align:-1px;margin-right:5px}
+  .col{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .card.accent{background:#33433a;border-color:var(--cool)}
+  .row{display:flex;align-items:center;justify-content:space-between}
+  .row .ti{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700}
+  .row .su{font-size:11px;color:var(--dim);font-weight:600}
+  .muted{font-size:12px;color:var(--dim);line-height:1.5}
+  button{font:inherit}
+  .btn{cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--dim);
+    border-radius:9px;padding:8px 10px;font-size:12px;letter-spacing:.02em;transition:all .15s}
+  .btn:hover{border-color:var(--cool);color:var(--text)}
+  .btn.on{background:var(--pine);border-color:var(--cool);color:#fff}
+  .btn.live{background:var(--you);border-color:var(--you);color:#062633;font-weight:700}
+  .btn:disabled{opacity:.4;cursor:default}
+  .btn.full{width:100%}
+  .winds{display:grid;grid-template-columns:repeat(4,1fr);gap:6;gap:6px;margin-top:8px}
+  .slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:6px;margin-top:8px;
+    background:linear-gradient(90deg,var(--pineDeep),var(--amber) 55%,var(--hot));outline:none}
+  .slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;
+    background:var(--amber);border:3px solid var(--ink);cursor:pointer;box-shadow:0 0 0 1px var(--amber)}
+  .slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--amber);border:3px solid var(--ink);cursor:pointer}
+  .ticks{display:flex;justify-content:space-between;font-size:10px;color:var(--dim);margin-top:4px}
+  .stats{display:flex;gap:8px;margin-top:8px}
+  .stat{flex:1;background:var(--ink);border-radius:9px;padding:8px 10px}
+  .stat b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+  .stat span{display:block;font-size:10px;color:var(--dim);margin-top:2px}
+  .strip{display:flex;align-items:flex-end;gap:3px;height:54px;background:var(--ink);border-radius:8px;padding:6px 8px;margin-top:4px}
+  .strip .b{flex:1;border-radius:3px}
+  .note{margin-top:14px;font-size:11px;color:var(--dim);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+  .pulse{transform-box:fill-box;transform-origin:center;animation:pz 2s ease-out infinite}
+  @keyframes pz{0%{transform:scale(.6);opacity:.6}100%{transform:scale(1.9);opacity:0}}
+  @media (prefers-reduced-motion:reduce){.pulse{animation:none;opacity:.35}}
+  .err{font-size:11px;color:var(--hot);margin-top:6px}
+  .ico{width:15px;height:15px;flex:0 0 auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <div class="eyebrow">Thalatta · Kalamitsi · Zea · teren</div>
+      <h1>Gde sam i gde da postavim šator</h1>
+      <div class="sub">Kalibriši sa dva tapa pa te mapa prati. Sunce/senka za <b style="color:var(--text)">6.7.2026</b>.</div>
+    </div>
+    <div class="clock">
+      <span id="sunIcon"></span>
+      <div><div class="t" id="timeLabel">15:00</div><div class="s" id="sunLabel"></div></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="mapbox" id="mapbox">
+      <div class="banner" id="banner" style="display:none"></div>
+      <svg class="map" id="map" viewBox="0 0 760 560"></svg>
+      <div class="legend">
+        <span><i style="background:var(--pine)"></i>hlad</span>
+        <span><i style="background:var(--amber)"></i>delom na suncu</span>
+        <span><i style="background:var(--hot)"></i>pripeka</span>
+        <span><i style="background:var(--you);border-radius:99px"></i>ti</span>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card accent" id="fieldCard"></div>
+
+      <div class="card">
+        <div class="row"><div class="ti">☀️ Doba dana</div></div>
+        <input class="slider" id="time" type="range" min="5" max="21" step="0.25" value="15">
+        <div class="ticks"><span>05h</span><span>podne ~13:24</span><span>21h</span></div>
+        <button class="btn on full" id="bestBtn" data-action="best" style="margin-top:10px">✓ istakni najviše hlada (12–17h)</button>
+      </div>
+
+      <div class="card">
+        <div class="row"><div class="ti">🌬️ Vetar duva sa</div><div class="su" id="windLabel">SZ</div></div>
+        <div class="winds" id="winds"></div>
+      </div>
+
+      <div class="card" id="pitchCard"></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <span>ⓘ</span>
+    <span>GPS radi uz dozvolu lokacije i preko <b>https</b> (npr. GitHub Pages) — na otvorenom ~5 m tačnosti, dovoljno za „u kom si delu", granično za tačnu parcelu od dve susedne. Raspored parcela/drveća je procena po brošuri; pošalji mi stvarni raspored sa terena pa ga zamenim. „Sunce po severu" koristi rotaciju iz kalibracije da poravna senke sa stvarnošću.</span>
+  </div>
+</div>
+
+<script>
+"use strict";
+// ── Sunce (6.7., EEST; solarno podne ~13:24) ─────────────────────────────
+var LAT = 40.05*Math.PI/180, DECL = 22.7*Math.PI/180, SOLAR_OFFSET = 1.40;
+function sunPos(h){
+  var solar=h-SOLAR_OFFSET, H=((solar-12)*15)*Math.PI/180;
+  var s=Math.sin(LAT)*Math.sin(DECL)+Math.cos(LAT)*Math.cos(DECL)*Math.cos(H);
+  s=Math.max(-1,Math.min(1,s)); var elev=Math.asin(s);
+  var cosAz=(Math.sin(DECL)-Math.sin(elev)*Math.sin(LAT))/(Math.cos(elev)*Math.cos(LAT));
+  cosAz=Math.max(-1,Math.min(1,cosAz)); var az=Math.acos(cosAz);
+  if(H>0) az=2*Math.PI-az; return {elev:elev, az:az};
+}
+// ── Geometrija ───────────────────────────────────────────────────────────
+var W=760, Hh=560, PXM=6;
+var PITCHES=[{id:1,x:250,y:120},{id:2,x:322,y:118},{id:3,x:392,y:132},{id:4,x:222,y:182},
+{id:5,x:300,y:186},{id:6,x:374,y:190},{id:7,x:450,y:186},{id:8,x:250,y:250},{id:9,x:330,y:254},
+{id:10,x:410,y:254},{id:11,x:300,y:320},{id:12,x:386,y:324},{id:13,x:470,y:316},{id:14,x:360,y:394}];
+var TREES=[{x:170,y:140,r:26,h:7},{x:160,y:210,r:28,h:8},{x:175,y:286,r:26,h:7},{x:200,y:360,r:30,h:8},
+{x:300,y:432,r:30,h:8},{x:392,y:446,r:32,h:9},{x:470,y:420,r:28,h:7},{x:340,y:90,r:24,h:6},
+{x:432,y:116,r:24,h:6},{x:256,y:200,r:20,h:5},{x:360,y:262,r:22,h:6},{x:442,y:250,r:22,h:6},
+{x:300,y:360,r:22,h:6},{x:522,y:232,r:24,h:7},{x:522,y:300,r:24,h:7}];
+var AMEN={x:470,y:466};
+var ZEA_PATH="M120,150 C140,70 260,52 360,60 C470,68 520,80 560,140 C600,200 560,300 520,360 "
++"C490,410 430,470 360,486 C300,500 230,470 200,430 C150,470 110,420 130,360 C150,300 110,230 120,150 Z";
+// ── Senka ────────────────────────────────────────────────────────────────
+function coverageBy(px,py,t,az,elev){
+  if(elev<=0.02) return 0;
+  var sdx=-Math.sin(az), sdy=Math.cos(az);
+  var L=Math.min((t.h/Math.tan(elev))*PXM,420);
+  var vx=px-t.x, vy=py-t.y, proj=vx*sdx+vy*sdy;
+  if(proj<-t.r*0.4||proj>L+t.r) return 0;
+  var ppx=vx-proj*sdx, ppy=vy-proj*sdy, perp=Math.hypot(ppx,ppy);
+  if(perp>t.r) return 0;
+  var across=1-perp/t.r, tip=proj>L?Math.max(0,1-(proj-L)/t.r):1;
+  return Math.max(0,across*tip);
+}
+function shadeAt(px,py,az,elev){var s=0;for(var i=0;i<TREES.length;i++)s+=coverageBy(px,py,TREES[i],az,elev);return Math.min(1,s);}
+// ── Boje / pomoćne ───────────────────────────────────────────────────────
+function lerp(a,b,t){return a+(b-a)*t;}
+function h2r(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];}
+function mix(h1,h2,t){var a=h2r(h1),b=h2r(h2);return "rgb("+Math.round(lerp(a[0],b[0],t))+","+Math.round(lerp(a[1],b[1],t))+","+Math.round(lerp(a[2],b[2],t))+")";}
+var COL={pine:"#00a341",amber:"#d19c6a",hot:"#a8612b",cool:"#5cb98a",pineDeep:"#00702c",sand:"#eee9e2",sandDark:"#d6cfc1",ink:"#2e2e30",ink2:"#3a3a3c",dim:"#a5a9ac",text:"#efece4",you:"#00a341",line:"#63636a"};
+function exposureColor(e){return e<0.5?mix(COL.pine,COL.amber,e/0.5):mix(COL.amber,COL.hot,(e-0.5)/0.5);}
+var DIRS=["S","SI","I","JI","J","JZ","Z","SZ"];
+function bearingLabel(d){return DIRS[Math.round((((d%360)+360)%360)/45)%8];}
+var DIR_FULL={S:"severa",SI:"severoistoka",I:"istoka",JI:"jugoistoka",J:"juga",JZ:"jugozapada",Z:"zapada",SZ:"severozapada"};
+function fmt(h){return ("0"+Math.floor(h)).slice(-2)+":"+("0"+Math.round((h%1)*60)).slice(-2);}
+function bvec(d){var r=d*Math.PI/180;return [Math.sin(r),-Math.cos(r)];}
+var HOT=[12,12.5,13,13.5,14,14.5,15,15.5,16,16.5,17,17.5];
+var WINDS=[["S",0],["SI",45],["I",90],["JI",135],["J",180],["JZ",225],["Z",270],["SZ",315]];
+function localFromGps(lat,lon,ref){
+  return {a:(lon-ref.lon)*Math.cos(ref.lat*Math.PI/180)*111320, b:-(lat-ref.lat)*110540};
+}
+function geoMsg(e){
+  if(!e) return "Lokacija nedostupna.";
+  if(e.code===1) return "Dozvola za lokaciju odbijena. Otvori preko https i dozvoli lokaciju.";
+  if(e.code===2) return "Signal lokacije nedostupan — izađi na otvoreno.";
+  if(e.code===3) return "Isteklo vreme za lokaciju, probaj ponovo.";
+  return "Greška lokacije.";
+}
+
+// ── Stanje ───────────────────────────────────────────────────────────────
+var S={time:15,windFrom:315,sel:null,showBest:true,
+  calib:[null,null],placing:null,ref:null,transform:null,
+  gps:null,gpsErr:null,heading:null,manual:false,youManual:null,alignSun:false,watchId:null};
+
+// ── Derivacije ───────────────────────────────────────────────────────────
+function azOff(){return (S.alignSun&&S.transform)?-S.transform.mapUp:0;}
+function youPos(){
+  if(S.manual) return S.youManual;
+  if(S.transform&&S.gps&&S.ref){
+    var L=localFromGps(S.gps.lat,S.gps.lon,S.ref), T=S.transform;
+    return {x:T.A*L.a-T.B*L.b+T.tx, y:T.B*L.a+T.A*L.b+T.ty};
+  }
+  return null;
+}
+function pxPerM(){return S.transform?Math.hypot(S.transform.A,S.transform.B):PXM;}
+function ranked(){
+  var off=azOff(), arr=PITCHES.map(function(p){
+    var acc=0; for(var i=0;i<HOT.length;i++){var s=sunPos(HOT[i]); acc+=shadeAt(p.x,p.y,s.az+off,s.elev);}
+    return {id:p.id,hot:acc/HOT.length};
+  });
+  arr.sort(function(a,b){return b.hot-a.hot;}); return arr;
+}
+
+// ── Crtanje mape ─────────────────────────────────────────────────────────
+function drawMap(){
+  var sun=sunPos(S.time), isDay=sun.elev>0.02, off=azOff(), azEff=sun.az+off;
+  var rk=ranked(), bestId=rk[0].id, hotMap={}; rk.forEach(function(r){hotMap[r.id]=r.hot;});
+  var out="";
+  out+='<defs><radialGradient id="sg" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="'+COL.amber+'" stop-opacity="0.9"/><stop offset="100%" stop-color="'+COL.amber+'" stop-opacity="0"/></radialGradient></defs>';
+  out+='<rect x="0" y="0" width="'+W+'" height="'+Hh+'" fill="'+COL.ink2+'"/>';
+  out+='<rect x="0" y="'+(Hh-70)+'" width="'+W+'" height="70" fill="#d19c6a" opacity="0.18"/>';
+  out+='<text x="'+(W-16)+'" y="'+(Hh-24)+'" text-anchor="end" font-size="12" fill="'+COL.dim+'" letter-spacing="0.2em">PLAŽA · MORE →</text>';
+  out+='<path d="'+ZEA_PATH+'" fill="'+COL.sand+'" stroke="'+COL.sandDark+'" stroke-width="2"/>';
+  out+='<text x="150" y="120" font-size="34" font-weight="800" fill="'+COL.pine+'" opacity="0.35" font-style="italic">Zea</text>';
+  if(isDay){
+    for(var i=0;i<TREES.length;i++){var t=TREES[i];
+      var sdx=-Math.sin(azEff), sdy=Math.cos(azEff), L=Math.min((t.h/Math.tan(sun.elev))*PXM,420);
+      var ex=t.x+sdx*L, ey=t.y+sdy*L, nx=-sdy, ny=sdx;
+      var pts=[[t.x+nx*t.r,t.y+ny*t.r],[t.x-nx*t.r,t.y-ny*t.r],[ex-nx*t.r*0.7,ey-ny*t.r*0.7],[ex+nx*t.r*0.7,ey+ny*t.r*0.7]].map(function(p){return p[0].toFixed(1)+","+p[1].toFixed(1);}).join(" ");
+      out+='<polygon points="'+pts+'" fill="'+COL.pineDeep+'" opacity="0.22"/>';
+    }
+  }
+  out+='<path d="M560,300 C600,300 640,300 700,300" stroke="'+COL.sandDark+'" stroke-width="10" fill="none" stroke-linecap="round" opacity="0.7"/>';
+  out+='<text x="648" y="288" font-size="11" fill="'+COL.dim+'">ulaz →</text>';
+  out+='<g transform="translate('+AMEN.x+','+AMEN.y+')"><rect x="-34" y="-22" width="68" height="44" rx="8" fill="'+COL.pine+'" opacity="0.9"/><text x="0" y="5" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">voda·WC</text></g>';
+  for(var j=0;j<TREES.length;j++){var tr=TREES[j];
+    out+='<g transform="translate('+tr.x+','+tr.y+')">'
+      +'<ellipse cx="0" cy="2" rx="'+(tr.r*0.5)+'" ry="'+(tr.r*0.5)+'" fill="'+COL.pine+'" opacity="0.25"/>'
+      +'<polygon points="0,'+(-tr.r*0.7)+' '+(tr.r*0.45)+','+(tr.r*0.3)+' '+(-tr.r*0.45)+','+(tr.r*0.3)+'" fill="'+COL.pineDeep+'"/>'
+      +'<polygon points="0,'+(-tr.r*0.4)+' '+(tr.r*0.5)+','+(tr.r*0.5)+' '+(-tr.r*0.5)+','+(tr.r*0.5)+'" fill="'+COL.pine+'"/></g>';
+  }
+  for(var k=0;k<PITCHES.length;k++){var p=PITCHES[k];
+    var sh=shadeAt(p.x,p.y,azEff,sun.elev), exp=isDay?(1-sh)*Math.sin(sun.elev):0;
+    var isBest=S.showBest&&p.id===bestId, isSel=p.id===S.sel;
+    var col=isDay?exposureColor(exp):COL.cool;
+    var stroke=isSel?"#fff":(isBest?COL.amber:COL.sandDark), sw=isSel?3:(isBest?3:1.5);
+    out+='<g>';
+    out+='<rect x="'+(p.x-24)+'" y="'+(p.y-18)+'" width="48" height="36" rx="7" fill="'+col+'" stroke="'+stroke+'" stroke-width="'+sw+'" opacity="0.95"/>';
+    if(isSel||isBest) out+='<polygon points="'+p.x+','+(p.y-9)+' '+(p.x+11)+','+(p.y+8)+' '+(p.x-11)+','+(p.y+8)+'" fill="none" stroke="#fff" stroke-width="2"/>';
+    out+='<text x="'+p.x+'" y="'+(p.y+((isSel||isBest)?0:4))+'" text-anchor="middle" font-size="13" font-weight="800" fill="'+((exp>0.55&&isDay)?"#fff":COL.ink)+'">'+p.id+'</text>';
+    if(isBest) out+='<text x="'+p.x+'" y="'+(p.y-24)+'" text-anchor="middle" font-size="10" font-weight="700" fill="'+COL.cool+'">NAJVIŠE HLADA</text>';
+    out+='</g>';
+  }
+  if(isDay){
+    var sv=bvec(azEff*180/Math.PI), smx=W/2+sv[0]*330, smy=Hh/2+sv[1]*300;
+    out+='<circle cx="'+smx+'" cy="'+smy+'" r="46" fill="url(#sg)"/><circle cx="'+smx+'" cy="'+smy+'" r="14" fill="'+COL.amber+'"/>';
+  }
+  var yp=youPos();
+  if(yp){
+    if(S.gps&&!S.manual) out+='<circle cx="'+yp.x+'" cy="'+yp.y+'" r="'+Math.max(8,S.gps.acc*pxPerM())+'" fill="'+COL.you+'" opacity="0.12" stroke="'+COL.you+'" stroke-opacity="0.4"/>';
+    out+='<circle class="pulse" cx="'+yp.x+'" cy="'+yp.y+'" r="14" fill="'+COL.you+'" opacity="0.5"/>';
+    var hd=headOnMap();
+    if(hd) out+='<polygon points="'+(yp.x+hd[0]*24)+','+(yp.y+hd[1]*24)+' '+(yp.x-hd[1]*7)+','+(yp.y+hd[0]*7)+' '+(yp.x+hd[1]*7)+','+(yp.y-hd[0]*7)+'" fill="'+COL.you+'"/>';
+    out+='<circle cx="'+yp.x+'" cy="'+yp.y+'" r="8" fill="#fff" stroke="'+COL.you+'" stroke-width="2.5"/>';
+    out+='<text x="'+yp.x+'" y="'+(yp.y-20)+'" text-anchor="middle" font-size="11" font-weight="800" fill="'+COL.you+'">TI</text>';
+  }
+  for(var c=0;c<S.calib.length;c++){var cc=S.calib[c]; if(cc) out+='<g transform="translate('+cc.px.x+','+cc.px.y+')"><circle r="7" fill="none" stroke="'+COL.you+'" stroke-width="2.5"/><circle r="2.5" fill="'+COL.you+'"/><text x="10" y="4" font-size="11" font-weight="700" fill="'+COL.you+'">'+(c+1)+'</text></g>';}
+  out+='<g transform="translate(58,58)"><circle r="26" fill="'+COL.ink+'" stroke="'+COL.line+'" stroke-width="1.5"/><polygon points="0,-20 6,4 0,-2 -6,4" fill="'+COL.hot+'"/><text x="0" y="-28" text-anchor="middle" font-size="11" font-weight="800" fill="'+COL.text+'">S</text></g>';
+  return out;
+}
+function headOnMap(){
+  if(S.heading==null||!S.transform) return null;
+  var d=bvec(S.heading), T=S.transform, x=T.A*d[0]-T.B*d[1], y=T.B*d[0]+T.A*d[1], n=Math.hypot(x,y)||1;
+  return [x/n,y/n];
+}
+
+// ── Kompas orijentacije šatora ───────────────────────────────────────────
+function orientSvg(){
+  var doorDeg=(S.windFrom+180)%360, sun=sunPos(S.time), isDay=sun.elev>0.02;
+  var sunDeg=((sun.az*180/Math.PI)%360+360)%360;
+  var R=34, wv=bvec(S.windFrom), sv=isDay?bvec(sunDeg):null;
+  var o='<svg viewBox="-50 -50 100 100" style="width:92px;height:92px;flex:0 0 auto">';
+  o+='<circle r="'+(R+6)+'" fill="'+COL.ink+'" stroke="'+COL.line+'" stroke-width="1.5"/>';
+  ["S","I","J","Z"].forEach(function(d,i){var v=bvec(i*90);o+='<text x="'+(v[0]*(R+1))+'" y="'+(v[1]*(R+1)+3)+'" text-anchor="middle" font-size="8" fill="'+COL.dim+'">'+d+'</text>';});
+  o+='<g transform="rotate('+doorDeg+')"><rect x="-13" y="-9" width="26" height="18" rx="3" fill="'+COL.pine+'" stroke="'+COL.cool+'" stroke-width="1.5"/><line x1="0" y1="-9" x2="0" y2="-22" stroke="'+COL.amber+'" stroke-width="2"/><polygon points="0,-26 3,-20 -3,-20" fill="'+COL.amber+'"/></g>';
+  o+='<line x1="'+(wv[0]*R)+'" y1="'+(wv[1]*R)+'" x2="'+(wv[0]*14)+'" y2="'+(wv[1]*14)+'" stroke="'+COL.hot+'" stroke-width="2.5"/>';
+  o+='<polygon points="'+(wv[0]*12)+','+(wv[1]*12)+' '+(wv[0]*20-wv[1]*4)+','+(wv[1]*20+wv[0]*4)+' '+(wv[0]*20+wv[1]*4)+','+(wv[1]*20-wv[0]*4)+'" fill="'+COL.hot+'"/>';
+  if(sv) o+='<circle cx="'+(sv[0]*(R+2))+'" cy="'+(sv[1]*(R+2))+'" r="4" fill="'+COL.amber+'"/>';
+  o+='</svg>'; return o;
+}
+
+// ── Kartice ──────────────────────────────────────────────────────────────
+function fieldCardHtml(){
+  var h='<div class="row"><div class="ti">📍 Na terenu (GPS)</div><div class="su">'+(S.transform?"kalibrisano ✓":(S.manual?"test režim":"nije kalibrisano"))+'</div></div>';
+  if(!S.transform&&!S.manual){
+    h+='<div class="muted" style="margin:8px 0">Stani na <b style="color:var(--text)">2 prepoznatljive tačke</b> (npr. blok voda/WC, pa ugao zone) — tapni gde si na mapi, ja uhvatim GPS.</div>';
+    h+='<div style="display:flex;gap:6px">';
+    h+='<button class="btn '+(S.placing===0?"live":"on")+'" style="flex:1" data-action="place0">'+(S.calib[0]?"↻ tačka 1":"① tačka 1")+'</button>';
+    h+='<button class="btn '+(S.placing===1?"live":(S.calib[0]?"on":""))+'" style="flex:1" data-action="place1" '+(S.calib[0]?"":"disabled")+'>'+(S.calib[1]?"↻ tačka 2":"② tačka 2")+'</button>';
+    h+='</div>';
+    h+='<button class="btn full" style="margin-top:8px" data-action="manual">✋ nemam GPS sad — testiraj tapom</button>';
+    if(S.gpsErr) h+='<div class="err">'+S.gpsErr+'</div>';
+  } else {
+    var yp=youPos();
+    if(yp){
+      var off=azOff(), sun=sunPos(S.time), now=shadeAt(yp.x,yp.y,sun.az+off,sun.elev);
+      var hot=0; for(var i=0;i<HOT.length;i++){var s=sunPos(HOT[i]); hot+=shadeAt(yp.x,yp.y,s.az+off,s.elev);} hot/=HOT.length;
+      var nn=null,nd=1e9; for(var k=0;k<PITCHES.length;k++){var d=Math.hypot(PITCHES[k].x-yp.x,PITCHES[k].y-yp.y); if(d<nd){nd=d;nn=PITCHES[k];}}
+      var bestId=ranked()[0].id;
+      h+='<div class="stats"><div class="stat"><b>'+Math.round((1-now)*100)+'%</b><span>na suncu sad</span></div><div class="stat"><b>'+Math.round(hot*100)+'%</b><span>hlad u špicu</span></div></div>';
+      h+='<div class="muted" style="margin-top:8px;color:var(--text)">Najbliža parcela: <b>#'+nn.id+'</b> (~'+Math.round(nd/pxPerM())+' m). '+(hot>=0.45?'<span style="color:var(--cool)">Dobar lad ovde.</span>':'<span style="color:var(--hot)">Slabo hladovito — probaj bliže #'+bestId+'.</span>')+'</div>';
+    } else {
+      h+='<div class="muted" style="margin-top:8px">'+(S.manual?"Tapni na mapi da postaviš svoju poziciju.":(S.gpsErr?S.gpsErr:"Tražim signal…"))+'</div>';
+    }
+    if(!S.manual&&S.gps) h+='<div class="muted" style="margin-top:6px">tačnost GPS-a ~'+Math.round(S.gps.acc)+' m</div>';
+    if(!S.manual&&S.gpsErr) h+='<div class="err">'+S.gpsErr+'</div>';
+    h+='<div style="display:flex;gap:6px;margin-top:10px">';
+    if(!S.manual) h+='<button class="btn" style="flex:1" data-action="compass">🧭 smer pogleda</button>';
+    if(S.transform) h+='<button class="btn '+(S.alignSun?"on":"")+'" style="flex:1" data-action="align">'+(S.alignSun?"✓ ":"")+'sunce po severu</button>';
+    h+='<button class="btn" data-action="reset">↺</button></div>';
+  }
+  return h;
+}
+function pitchCardHtml(){
+  var off=azOff();
+  if(S.sel==null) return '<div class="row"><div class="ti">🧭 Izaberi parcelu</div></div><div class="muted" style="margin-top:6px">Tapni parcelu na mapi za detalje, rastojanja i orijentaciju.</div>';
+  var p=null; for(var i=0;i<PITCHES.length;i++) if(PITCHES[i].id===S.sel) p=PITCHES[i];
+  var rk=ranked(), hot=0; rk.forEach(function(r){if(r.id===S.sel)hot=r.hot;});
+  var h='<div class="row"><div class="ti">🧭 Parcela #'+S.sel+'</div><div class="su">hlad u špicu '+Math.round(hot*100)+'%</div></div>';
+  h+='<div class="muted" style="margin-top:8px;margin-bottom:4px">Hlad kroz dan</div><div class="strip">';
+  for(var hh=6;hh<=20;hh++){var s=sunPos(hh); var day=s.elev>0.02; var sh=day?shadeAt(p.x,p.y,s.az+off,s.elev):1;
+    var bg=(hh>=12&&hh<=17)?COL.cool:COL.pine;
+    h+='<div class="b" title="'+fmt(hh)+' · hlad '+Math.round(sh*100)+'%" style="height:'+Math.max(6,sh*100)+'%;background:'+bg+';opacity:'+(day?1:0.4)+'"></div>';
+  }
+  h+='</div><div class="ticks"><span>6h</span><span>13h</span><span>20h</span></div>';
+  var dA=Math.round(Math.hypot(p.x-AMEN.x,p.y-AMEN.y)/PXM), dB=Math.round((Hh-p.y+30)/PXM);
+  h+='<div class="stats"><div class="stat"><b>'+dA+' m</b><span>do vode/WC</span></div><div class="stat"><b>~'+dB+' m</b><span>do plaže</span></div></div>';
+  var doorDeg=(S.windFrom+180)%360, faceEast=Math.abs(((doorDeg-90+540)%360)-180)>135;
+  h+='<div style="margin-top:14px;display:flex;gap:12px;align-items:center">'+orientSvg()+'<div style="font-size:12px;line-height:1.5"><div style="color:var(--amber);font-weight:700;margin-bottom:3px">Okreni šator</div>Leđa (niža strana) ka <b>'+bearingLabel(S.windFrom)+'</b> — u vetar. Vrata ka <b>'+bearingLabel(doorDeg)+'</b>.'+(faceEast?' <span style="color:var(--hot)">Vrata gledaju jutarnje sunce — biće toplo rano.</span>':'')+'</div></div>';
+  return h;
+}
+
+// ── Render ───────────────────────────────────────────────────────────────
+var $=function(id){return document.getElementById(id);};
+function update(){
+  var sun=sunPos(S.time), isDay=sun.elev>0.02, sunDeg=((sun.az*180/Math.PI)%360+360)%360, elevDeg=sun.elev*180/Math.PI;
+  $("map").innerHTML=drawMap();
+  $("timeLabel").textContent=fmt(S.time);
+  $("sunLabel").textContent=isDay?("sunce "+elevDeg.toFixed(0)+"° · sa "+DIR_FULL[bearingLabel(sunDeg)]):"noć";
+  $("sunIcon").innerHTML=isDay
+    ?'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="'+COL.amber+'" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>'
+    :'<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="'+COL.cool+'" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>';
+  $("windLabel").textContent=bearingLabel(S.windFrom);
+  $("fieldCard").innerHTML=fieldCardHtml();
+  $("pitchCard").innerHTML=pitchCardHtml();
+  $("mapbox").className="mapbox"+((S.placing!=null||S.manual)?" field":"");
+  var bn=$("banner");
+  if(S.placing!=null||S.manual){bn.style.display="flex";
+    bn.innerHTML='<span>✛</span>'+(S.manual?'<span>Test režim — <b>tapni na mapi</b> gde bi stao.</span>':'<span>Tapni <b>tačno gde stojiš</b> ('+(S.placing===0?"tačka 1":"tačka 2")+'), pa hvatam GPS.</span>');
+  } else bn.style.display="none";
+  // winds active
+  var wb=$("winds").children; for(var i=0;i<wb.length;i++){var deg=+wb[i].getAttribute("data-wind"); wb[i].className="btn"+(S.windFrom===deg?" on":"");}
+  $("bestBtn").className="btn full"+(S.showBest?" on":""); $("bestBtn").textContent=(S.showBest?"✓ ":"")+"istakni najviše hlada (12–17h)";
+}
+
+// ── GPS / orijentacija ───────────────────────────────────────────────────
+function startWatch(){
+  if(!("geolocation" in navigator)||S.manual) return;
+  if(S.watchId!=null) navigator.geolocation.clearWatch(S.watchId);
+  S.watchId=navigator.geolocation.watchPosition(function(pos){
+    S.gps={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:pos.coords.accuracy}; S.gpsErr=null; update();
+  },function(err){S.gpsErr=geoMsg(err); update();},{enableHighAccuracy:true,maximumAge:1000,timeout:15000});
+}
+function buildTransform(){
+  var pts=S.calib, r0=S.ref||{lat:pts[0].gps.lat,lon:pts[0].gps.lon};
+  var L1=localFromGps(pts[0].gps.lat,pts[0].gps.lon,r0), L2=localFromGps(pts[1].gps.lat,pts[1].gps.lon,r0);
+  var da=L2.a-L1.a, db=L2.b-L1.b, dpx=pts[1].px.x-pts[0].px.x, dpy=pts[1].px.y-pts[0].px.y, det=da*da+db*db||1e-6;
+  var A=(da*dpx+db*dpy)/det, B=(da*dpy-db*dpx)/det;
+  var tx=pts[0].px.x-(A*L1.a-B*L1.b), ty=pts[0].px.y-(B*L1.a+A*L1.b), mapUp=Math.atan2(-B,A);
+  S.ref=r0; S.transform={A:A,B:B,tx:tx,ty:ty,mapUp:mapUp}; startWatch();
+}
+function enableCompass(){
+  function add(){function on(e){var hh=(e.webkitCompassHeading!=null)?e.webkitCompassHeading:(e.alpha!=null?360-e.alpha:null); if(hh!=null){S.heading=hh; update();}}
+    window.addEventListener("deviceorientationabsolute",on,true); window.addEventListener("deviceorientation",on,true);}
+  if(typeof DeviceOrientationEvent!=="undefined"&&typeof DeviceOrientationEvent.requestPermission==="function"){
+    DeviceOrientationEvent.requestPermission().then(function(s){if(s==="granted")add();}).catch(function(){});
+  } else add();
+}
+
+// ── Klik na mapu ─────────────────────────────────────────────────────────
+function mapClick(e){
+  var r=$("map").getBoundingClientRect();
+  var x=(e.clientX-r.left)/r.width*W, y=(e.clientY-r.top)/r.height*Hh;
+  if(S.manual){S.youManual={x:x,y:y}; update(); return;}
+  if(S.placing!=null){
+    if(!("geolocation" in navigator)){S.gpsErr="Ovaj preglednik ne nudi lokaciju — koristi test tapom."; update(); return;}
+    var idx=S.placing;
+    navigator.geolocation.getCurrentPosition(function(pos){
+      S.calib[idx]={px:{x:x,y:y},gps:{lat:pos.coords.latitude,lon:pos.coords.longitude}};
+      if(idx===0&&!S.ref) S.ref={lat:pos.coords.latitude,lon:pos.coords.longitude};
+      S.placing=null; S.gpsErr=null;
+      if(S.calib[0]&&S.calib[1]) buildTransform();
+      update();
+    },function(err){S.gpsErr=geoMsg(err); update();},{enableHighAccuracy:true,timeout:12000,maximumAge:0});
+    return;
+  }
+  // izbor parcele
+  var best=null,bd=30;
+  for(var i=0;i<PITCHES.length;i++){var d=Math.hypot(PITCHES[i].x-x,PITCHES[i].y-y); if(d<bd){bd=d;best=PITCHES[i];}}
+  if(best){S.sel=best.id; update();}
+}
+
+// ── Akcije ───────────────────────────────────────────────────────────────
+function onAction(a){
+  if(a==="best"){S.showBest=!S.showBest;}
+  else if(a==="place0"){S.placing=0;}
+  else if(a==="place1"){if(S.calib[0])S.placing=1;}
+  else if(a==="manual"){S.manual=true; S.placing=null;}
+  else if(a==="compass"){enableCompass();}
+  else if(a==="align"){S.alignSun=!S.alignSun;}
+  else if(a==="reset"){
+    if(S.watchId!=null){navigator.geolocation.clearWatch(S.watchId); S.watchId=null;}
+    S.calib=[null,null]; S.placing=null; S.ref=null; S.transform=null; S.gps=null; S.gpsErr=null; S.youManual=null; S.manual=false; S.alignSun=false; S.heading=null;
+  }
+  update();
+}
+
+// ── Init ─────────────────────────────────────────────────────────────────
+(function init(){
+  var wc=$("winds");
+  WINDS.forEach(function(w){var b=document.createElement("button"); b.className="btn"; b.setAttribute("data-wind",w[1]); b.textContent=w[0]; b.addEventListener("click",function(){S.windFrom=w[1]; update();}); wc.appendChild(b);});
+  $("time").addEventListener("input",function(e){S.time=parseFloat(e.target.value); update();});
+  $("map").addEventListener("click",mapClick);
+  document.addEventListener("click",function(e){var el=e.target.closest&&e.target.closest("[data-action]"); if(el) onAction(el.getAttribute("data-action"));});
+  update();
+})();
+</script>
+</body>
+</html>
